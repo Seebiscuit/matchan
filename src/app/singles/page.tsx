@@ -1,13 +1,24 @@
 'use client';
 
-import { Table, Avatar, Tag, Space } from 'antd';
+import { Table, Avatar, Tag, Space, Button, Popconfirm, message } from 'antd';
+import { DeleteOutlined } from '@ant-design/icons';
 import { ColumnsType } from 'antd/es/table';
-import { useSingles, SingleWithTags } from '@/hooks/singles/use-singles';
+import { useSingles, SingleWithTags, useDeleteSingle } from '@/hooks/singles/use-singles';
 import dayjs from 'dayjs';
 import React from 'react';
 
 export default function SinglesPage() {
   const { data: singles, isLoading } = useSingles();
+  const deleteMutation = useDeleteSingle();
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteMutation.mutateAsync(id);
+      message.success('Single deleted successfully');
+    } catch (error) {
+      message.error('Failed to delete single');
+    }
+  };
 
   const columns: ColumnsType<SingleWithTags> = [
     {
@@ -73,6 +84,28 @@ export default function SinglesPage() {
       render: (_, record) => dayjs(record.createdAt).format('YYYY-MM-DD HH:mm'),
       sorter: (a, b) => 
         dayjs(a.createdAt).unix() - dayjs(b.createdAt).unix(),
+    },
+    {
+      title: 'Actions',
+      key: 'actions',
+      width: 100,
+      render: (_, record) => (
+        <Popconfirm
+          title="Delete Single"
+          description="Are you sure you want to delete this single?"
+          onConfirm={() => handleDelete(record.id)}
+          okText="Yes"
+          cancelText="No"
+          okButtonProps={{ danger: true }}
+        >
+          <Button 
+            type="text" 
+            danger 
+            icon={<DeleteOutlined />}
+            loading={deleteMutation.isPending}
+          />
+        </Popconfirm>
+      ),
     },
   ];
 
