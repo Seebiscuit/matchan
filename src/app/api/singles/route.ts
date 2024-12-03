@@ -2,9 +2,8 @@ import { NextResponse } from "next/server";
 import { singlesRepository } from "@/lib/api/repository/singles";
 import { z } from "zod";
 import { saveImage } from "@/lib/utils/image-upload";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/config";
-import { Prisma } from "@prisma/client";
+import { withAuth } from "@/lib/auth/withAuth";
+import { UserRole } from "@prisma/client";
 
 const createSingleSchema = z.object({
   firstName: z.string().min(1),
@@ -19,7 +18,7 @@ const createSingleSchema = z.object({
   tags: data.tags || [], // Ensure tags is always an array
 }));
 
-export async function POST(req: Request) {
+async function POST(req: Request) {
   try {
     const body = await req.json();
     const data = createSingleSchema.parse(body);
@@ -40,16 +39,6 @@ export async function POST(req: Request) {
     return NextResponse.json(single);
   } catch (error) {
     console.error('Failed to create single:', error);
-
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === 'P2002') {
-        return NextResponse.json(
-          { error: 'A single with this email already exists' },
-          { status: 409 }
-        );
-      }
-    }
-
     return NextResponse.json(
       { error: 'Failed to create single' },
       { status: 500 }
@@ -57,7 +46,7 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET(req: Request) {
+async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const search = searchParams.get('search') || undefined;
   const tags = searchParams.get('tags')?.split(',') || undefined;
@@ -80,4 +69,9 @@ export async function GET(req: Request) {
       { status: 500 }
     );
   }
-} 
+}
+
+const POST_HANDLER = withAuth(POST, { requiredRoles: [UserRole.ADMIN, UserRole.USER] });
+const GET_HANDLER = withAuth(GET, { requiredRoles: [UserRole.ADMIN] });
+
+export { POST_HANDLER as POST, GET_HANDLER as GET }; 

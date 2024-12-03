@@ -1,10 +1,11 @@
 import 'next-auth';
+import { UserRole } from '@prisma/client';
 
 export type AuthUser = {
   id: string;
   email: string;
   name?: string;
-  role: 'ADMIN' | 'USER';
+  role: UserRole;
   isApproved: boolean;
 };
 

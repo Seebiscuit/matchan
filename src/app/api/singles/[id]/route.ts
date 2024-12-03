@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { singlesRepository } from "@/lib/api/repository/singles";
+import { withAuth } from "@/lib/auth/withAuth";
+import { UserRole } from "@prisma/client";
 import { z } from "zod";
 
 const updateSingleSchema = z.object({
@@ -11,7 +13,7 @@ const updateSingleSchema = z.object({
   tags: z.array(z.string()).optional(),
 });
 
-export async function GET(
+async function GET(
   req: Request,
   { params }: { params: { id: string } }
 ) {
@@ -33,7 +35,7 @@ export async function GET(
   }
 }
 
-export async function PATCH(
+async function PATCH(
   req: Request,
   { params }: { params: { id: string } }
 ) {
@@ -56,13 +58,13 @@ export async function PATCH(
   }
 }
 
-export async function DELETE(
+async function DELETE(
   req: Request,
   { params }: { params: { id: string } }
 ) {
   try {
     await singlesRepository.delete(params.id);
-    return new NextResponse(null, { status: 204 });
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Failed to delete single:', error);
     return NextResponse.json(
@@ -70,4 +72,10 @@ export async function DELETE(
       { status: 500 }
     );
   }
-} 
+}
+
+const GET_HANDLER = withAuth(GET, { requiredRoles: [UserRole.ADMIN] });
+const PATCH_HANDLER = withAuth(PATCH, { requiredRoles: [UserRole.ADMIN] });
+const DELETE_HANDLER = withAuth(DELETE, { requiredRoles: [UserRole.ADMIN] });
+
+export { GET_HANDLER as GET, PATCH_HANDLER as PATCH, DELETE_HANDLER as DELETE }; 

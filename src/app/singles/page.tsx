@@ -20,7 +20,7 @@ export default function SinglesPage() {
     }
   };
 
-  const getImageUrl = (imageId: string) => {
+  const getimageId = (imageId: string) => {
     return `/api/assets/singles/${imageId}`;
   };
 
@@ -33,7 +33,7 @@ export default function SinglesPage() {
         if (!record.imageId) return null;
         return (
           <Avatar
-            src={getImageUrl(record.imageId)}
+            src={getimageId(record.imageId)}
             size={64}
             shape="square"
           />

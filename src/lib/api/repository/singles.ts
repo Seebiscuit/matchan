@@ -59,12 +59,12 @@ export const singlesRepository = {
     // Get the single to delete its image
     const single = await prisma.single.findUnique({
       where: { id },
-      select: { imageUrl: true },
+      select: { imageId: true },
     });
 
     // Delete the image file if it exists
-    if (single?.imageUrl) {
-      await deleteImage(single.imageUrl);
+    if (single?.imageId) {
+      await deleteImage(single.imageId);
     }
 
     // Delete the single from database
