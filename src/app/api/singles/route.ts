@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { singlesRepository } from "@/lib/api/repository/singles";
 import { z } from "zod";
-import { Buffer } from 'buffer';
+import { saveImage } from "@/lib/utils/image-upload";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth/config";
 import { Prisma } from "@prisma/client";
-
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 
 const createSingleSchema = z.object({
   firstName: z.string().min(1),
@@ -24,14 +24,17 @@ export async function POST(req: Request) {
     const body = await req.json();
     const data = createSingleSchema.parse(body);
     
-    const imageBuffer = data.image 
-      ? Buffer.from(data.image.split(',')[1], 'base64')
-      : undefined;
+    // Save image if provided
+    let imageId: string | undefined;
+    if (data.image) {
+      imageId = await saveImage(data.image);
+      data.image = undefined;
+    }
 
     const single = await singlesRepository.create({
       ...data,
       dateOfBirth: new Date(data.dateOfBirth),
-      image: imageBuffer,
+      imageId,
     });
 
     return NextResponse.json(single);
@@ -49,7 +52,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(
       { error: 'Failed to create single' },
-      { status: 400 }
+      { status: 500 }
     );
   }
 }

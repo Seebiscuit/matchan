@@ -26,7 +26,7 @@ model Single {
   email       String?    @unique
   gender      Gender
   dateOfBirth DateTime
-  image       Bytes?
+  imageId     String?
   tags        Tag[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt

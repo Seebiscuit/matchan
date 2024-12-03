@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db/prisma";
 import { Prisma } from "@prisma/client";
+import { deleteImage } from "@/lib/utils/image-upload";
 
 export type CreateSingleInput = {
   firstName: string;
@@ -7,7 +8,7 @@ export type CreateSingleInput = {
   email?: string;
   gender: 'MALE' | 'FEMALE';
   dateOfBirth: Date;
-  image?: Buffer;
+  imageId?: string;
   tags?: string[];
 };
 
@@ -55,6 +56,18 @@ export const singlesRepository = {
   },
 
   delete: async (id: string) => {
+    // Get the single to delete its image
+    const single = await prisma.single.findUnique({
+      where: { id },
+      select: { imageUrl: true },
+    });
+
+    // Delete the image file if it exists
+    if (single?.imageUrl) {
+      await deleteImage(single.imageUrl);
+    }
+
+    // Delete the single from database
     return prisma.single.delete({
       where: { id },
     });

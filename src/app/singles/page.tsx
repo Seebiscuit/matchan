@@ -20,16 +20,20 @@ export default function SinglesPage() {
     }
   };
 
+  const getImageUrl = (imageId: string) => {
+    return `/api/assets/singles/${imageId}`;
+  };
+
   const columns: ColumnsType<SingleWithTags> = [
     {
       title: 'Photo',
       key: 'photo',
       width: 80,
       render: (_, record) => {
-        if (!record.image) return null;
+        if (!record.imageId) return null;
         return (
           <Avatar
-            src={`data:image/jpeg;base64,${record.image.toString('base64')}`}
+            src={getImageUrl(record.imageId)}
             size={64}
             shape="square"
           />
