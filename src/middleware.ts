@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 export default withAuth(
   function middleware(req) {
     const token = req.nextauth.token;
+    const path = req.nextUrl.pathname;
     
     // Not logged in
     if (!token) {
@@ -11,16 +12,18 @@ export default withAuth(
     }
 
     // Not approved
-    if (!token.isApproved && req.nextUrl.pathname !== "/auth/pending") {
+    if (!token.isApproved && path !== "/auth/pending") {
       return NextResponse.redirect(new URL("/auth/pending", req.url));
     }
 
+    // Redirect root to singles page for approved users
+    if (path === "/" && token.isApproved && token.role !== "ADMIN") {
+      return NextResponse.redirect(new URL("/singles/new", req.url));
+    }
+
     // Admin only routes
-    if (
-      req.nextUrl.pathname.startsWith("/admin") && 
-      token.role !== "ADMIN"
-    ) {
-      return NextResponse.redirect(new URL("/", req.url));
+    if (path.startsWith("/admin") && token.role !== "ADMIN") {
+      return NextResponse.redirect(new URL("/singles/new", req.url));
     }
 
     return NextResponse.next();
@@ -34,9 +37,9 @@ export default withAuth(
 
 export const config = {
   matcher: [
+    "/",
     "/singles/:path*",
     "/admin/:path*",
-    "/search/:path*",
-    "/",
+    "/auth/pending",
   ],
 }; 
