@@ -65,7 +65,6 @@ export const singlesRepository = {
       where: { id },
       include: {
         tags: true,
-        image: true,
       },
     });
   },
@@ -100,7 +99,6 @@ export const singlesRepository = {
       skip: params?.skip,
       include: {
         tags: true,
-        image: true,
       },
       orderBy: {
         createdAt: 'desc',

@@ -16,14 +16,16 @@ export default withAuth(
       return NextResponse.redirect(new URL("/auth/pending", req.url));
     }
 
-    // Redirect root to singles page for approved users
-    if (path === "/" && token.isApproved && token.role !== "ADMIN") {
+    // Non-admin users can only access /singles/new
+    if (path === "/singles" && token.role !== "ADMIN") {
       return NextResponse.redirect(new URL("/singles/new", req.url));
     }
 
-    // Admin only routes
-    if (path.startsWith("/admin") && token.role !== "ADMIN") {
-      return NextResponse.redirect(new URL("/singles/new", req.url));
+    // Redirect root to appropriate page based on role
+    if (path === "/") {
+      return NextResponse.redirect(
+        new URL(token.role === "ADMIN" ? "/singles" : "/singles/new", req.url)
+      );
     }
 
     return NextResponse.next();
@@ -38,8 +40,8 @@ export default withAuth(
 export const config = {
   matcher: [
     "/",
-    "/singles/:path*",
-    "/admin/:path*",
+    "/singles",
+    "/singles/new",
     "/auth/pending",
   ],
 }; 
