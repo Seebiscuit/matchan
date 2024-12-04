@@ -8,6 +8,7 @@ import { CameraInput } from '@/components/camera-input';
 import dayjs from 'dayjs';
 import { phoneNumberUtils } from '@/lib/utils/phone-number'
 import { errorFormatting } from '@/lib/utils/error-formatting';
+import { getFormRules } from '@/lib/validation/singles';
 
 type ApiError = {
   message: string;
@@ -96,10 +97,7 @@ export default function NewSinglePage() {
             name="firstName"
             validateStatus={fieldErrors.firstName ? 'error' : undefined}
             help={fieldErrors.firstName}
-            rules={[
-              { required: true, message: 'Please input first name' },
-              { min: 2, message: 'First name must be at least 2 characters' }
-            ]}
+            rules={getFormRules('firstName')}
           >
             <Input />
           </Form.Item>
@@ -109,10 +107,7 @@ export default function NewSinglePage() {
             name="lastName"
             validateStatus={fieldErrors.lastName ? 'error' : undefined}
             help={fieldErrors.lastName}
-            rules={[
-              { required: true, message: 'Please input last name' },
-              { min: 2, message: 'Last name must be at least 2 characters' }
-            ]}
+            rules={getFormRules('lastName')}
           >
             <Input />
           </Form.Item>
@@ -122,14 +117,7 @@ export default function NewSinglePage() {
             name="phoneNumber"
             validateStatus={fieldErrors.phoneNumber ? 'error' : undefined}
             help={fieldErrors.phoneNumber || "Enter a US phone number"}
-            rules={[
-              { required: true, message: 'Please input phone number' },
-              { validator: (_, value) => 
-                phoneNumberUtils.validate(value) 
-                  ? Promise.resolve()
-                  : Promise.reject('Please enter a valid phone number')
-              }
-            ]}
+            rules={getFormRules('phoneNumber')}
           >
             <Input 
               onChange={e => {
@@ -146,7 +134,7 @@ export default function NewSinglePage() {
             name="email"
             validateStatus={fieldErrors.email ? 'error' : undefined}
             help={fieldErrors.email}
-            rules={[{ type: 'email', message: 'Please enter a valid email' }]}
+            rules={getFormRules('email')}
           >
             <Input />
           </Form.Item>
@@ -154,7 +142,7 @@ export default function NewSinglePage() {
           <Form.Item
             label="Gender"
             name="gender"
-            rules={[{ required: true, message: 'Please select gender' }]}
+            rules={getFormRules('gender')}
           >
             <Select>
               <Select.Option value="MALE">Male</Select.Option>
@@ -165,7 +153,7 @@ export default function NewSinglePage() {
           <Form.Item
             label="Date of Birth"
             name="dateOfBirth"
-            rules={[{ required: true, message: 'Please select date of birth' }]}
+            rules={getFormRules('dateOfBirth')}
           >
             <DatePicker 
               className="w-full"
