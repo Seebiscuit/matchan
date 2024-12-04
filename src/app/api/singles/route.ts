@@ -17,11 +17,15 @@ const createSingleSchema = z.object({
   gender: z.enum(['MALE', 'FEMALE']),
   dateOfBirth: z.string().datetime(),
   image: z.string().optional(),
-  tags: z.array(z.string()).optional().default([]),
-}).required().transform(data => ({
-  ...data,
-  tags: data.tags || [],
-}));
+  tags: z.array(z.string()).optional(),
+})
+.transform(data => {
+  // Ensure tags is an array, but don't modify other fields
+  return {
+    ...data,
+    tags: data.tags || [],
+  }
+});
 
 async function POST(req: Request) {
   try {
@@ -32,13 +36,17 @@ async function POST(req: Request) {
     let imageId: string | undefined;
     if (data.image) {
       imageId = await saveImage(data.image);
-      data.image = undefined;
     }
 
     const single = await singlesRepository.create({
-      ...data,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      phoneNumber: data.phoneNumber,
+      gender: data.gender,
       dateOfBirth: new Date(data.dateOfBirth),
+      email: data.email,
       imageId,
+      tags: data.tags,
     });
 
     return NextResponse.json(single);

@@ -3,7 +3,7 @@ import { singlesRepository } from "@/lib/api/repository/singles";
 import { withAuth } from "@/lib/auth/withAuth";
 import { UserRole } from "@prisma/client";
 import { z } from "zod";
-import { phoneNumberUtils } from "@/lib/utils/phoneNumberUtils";
+import { phoneNumberUtils } from "@/lib/utils/phone-number";
 
 const updateSingleSchema = z.object({
   firstName: z.string().min(1).optional(),
