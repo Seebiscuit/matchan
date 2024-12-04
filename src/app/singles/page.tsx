@@ -6,6 +6,7 @@ import { ColumnsType } from 'antd/es/table';
 import { useSingles, SingleWithTags, useDeleteSingle } from '@/hooks/singles/use-singles';
 import dayjs from 'dayjs';
 import React from 'react';
+import { phoneNumberUtils } from '@/lib/utils/phone-number';
 
 export default function SinglesPage() {
   const { data: singles, isLoading } = useSingles();
@@ -45,6 +46,11 @@ export default function SinglesPage() {
       key: 'name',
       render: (_, record) => `${record.firstName} ${record.lastName}`,
       sorter: (a, b) => a.firstName.localeCompare(b.firstName),
+    },
+    {
+      title: 'Phone',
+      key: 'phoneNumber',
+      render: (_, record) => phoneNumberUtils.format(record.phoneNumber),
     },
     {
       title: 'Email',

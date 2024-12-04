@@ -3,10 +3,15 @@ import { singlesRepository } from "@/lib/api/repository/singles";
 import { withAuth } from "@/lib/auth/withAuth";
 import { UserRole } from "@prisma/client";
 import { z } from "zod";
+import { phoneNumberUtils } from "@/lib/utils/phoneNumberUtils";
 
 const updateSingleSchema = z.object({
   firstName: z.string().min(1).optional(),
   lastName: z.string().min(1).optional(),
+  phoneNumber: z.string()
+    .min(1, 'Phone number is required')
+    .refine(phoneNumberUtils.validate, 'Invalid phone number')
+    .transform(phoneNumberUtils.normalize),
   email: z.string().email().optional(),
   gender: z.enum(['MALE', 'FEMALE']).optional(),
   dateOfBirth: z.string().datetime().optional(),

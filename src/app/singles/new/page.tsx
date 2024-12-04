@@ -6,6 +6,7 @@ import { useCreateSingle } from '@/hooks/singles/use-create-single';
 import type { CreateSingleDto } from '@/types/singles';
 import { CameraInput } from '@/components/camera-input';
 import dayjs from 'dayjs';
+import { phoneNumberUtils } from '@/lib/utils/phone-number'
 
 export default function NewSinglePage() {
   const { mutate: createSingle, isPending } = useCreateSingle();
@@ -65,6 +66,29 @@ export default function NewSinglePage() {
             rules={[{ required: true, message: 'Please input last name' }]}
           >
             <Input />
+          </Form.Item>
+
+          <Form.Item
+            label="Phone Number"
+            name="phoneNumber"
+            rules={[
+              { required: true, message: 'Please input phone number' },
+              { validator: (_, value) => 
+                phoneNumberUtils.validate(value) 
+                  ? Promise.resolve()
+                  : Promise.reject('Please enter a valid phone number')
+              }
+            ]}
+            help="Enter a US phone number"
+          >
+            <Input 
+              onChange={e => {
+                const formatted = phoneNumberUtils.format(e.target.value)
+                if (formatted !== e.target.value) {
+                  form.setFieldsValue({ phoneNumber: formatted })
+                }
+              }}
+            />
           </Form.Item>
 
           <Form.Item

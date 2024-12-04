@@ -23,7 +23,8 @@ model Single {
   id          String    @id @default(cuid())
   firstName   String
   lastName    String
-  email       String?    @unique
+  email       String?
+  phoneNumber String    @unique
   gender      Gender
   dateOfBirth DateTime
   imageId     String?

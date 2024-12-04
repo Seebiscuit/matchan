@@ -6,6 +6,7 @@ export type CreateSingleInput = {
   firstName: string;
   lastName: string;
   email?: string;
+  phoneNumber: string;
   gender: 'MALE' | 'FEMALE';
   dateOfBirth: Date;
   imageId?: string;
@@ -95,6 +96,7 @@ export const singlesRepository = {
         { firstName: { contains: params.search, mode: 'insensitive' } },
         { lastName: { contains: params.search, mode: 'insensitive' } },
         { email: { contains: params.search, mode: 'insensitive' } },
+        { phoneNumber: { contains: params.search } },
       ];
     }
 

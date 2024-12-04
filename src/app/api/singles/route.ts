@@ -4,10 +4,15 @@ import { z } from "zod";
 import { saveImage } from "@/lib/utils/image-upload";
 import { withAuth } from "@/lib/auth/withAuth";
 import { UserRole } from "@prisma/client";
+import { phoneNumberUtils } from '@/lib/utils/phone-number'
 
 const createSingleSchema = z.object({
   firstName: z.string().min(1),
   lastName: z.string().min(1),
+  phoneNumber: z.string()
+    .min(1, 'Phone number is required')
+    .refine(phoneNumberUtils.validate, 'Invalid phone number')
+    .transform(phoneNumberUtils.normalize),
   email: z.string().email().optional(),
   gender: z.enum(['MALE', 'FEMALE']),
   dateOfBirth: z.string().datetime(),
@@ -15,7 +20,7 @@ const createSingleSchema = z.object({
   tags: z.array(z.string()).optional().default([]),
 }).required().transform(data => ({
   ...data,
-  tags: data.tags || [], // Ensure tags is always an array
+  tags: data.tags || [],
 }));
 
 async function POST(req: Request) {
