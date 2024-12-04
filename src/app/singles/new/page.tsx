@@ -7,14 +7,55 @@ import type { CreateSingleDto } from '@/types/singles';
 import { CameraInput } from '@/components/camera-input';
 import dayjs from 'dayjs';
 import { phoneNumberUtils } from '@/lib/utils/phone-number'
+import { errorFormatting } from '@/lib/utils/error-formatting';
+
+type ApiError = {
+  message: string;
+  code?: string;
+  details?: {
+    fields?: string[];
+    issues?: Array<{
+      path: (string | number)[];
+      message: string;
+    }>;
+  };
+};
 
 export default function NewSinglePage() {
   const { mutate: createSingle, isPending } = useCreateSingle();
   const [form] = Form.useForm();
+  const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
 
   const maxDate = dayjs().subtract(18, 'year');
 
+  const handleError = (error: any) => {
+    const apiError: ApiError = error.cause || {
+      message: error.message || 'Failed to create single'
+    };
+
+    message.error(apiError.message);
+    const newFieldErrors: Record<string, string> = {};
+
+    // Handle validation errors
+    if (apiError.code === 'VALIDATION_ERROR' && apiError.details?.issues) {
+      apiError.details.issues.forEach(issue => {
+        const field = issue.path.join('.');
+        newFieldErrors[field] = errorFormatting.formatValidationError(field, issue.message);
+      });
+    }
+
+    // Handle unique constraint violations
+    if (apiError.code === 'UNIQUE_CONSTRAINT_VIOLATION' && apiError.details?.fields) {
+      apiError.details.fields.forEach(field => {
+        newFieldErrors[field] = errorFormatting.formatUniqueError(field);
+      });
+    }
+
+    setFieldErrors(newFieldErrors);
+  };
+
   const onFinish = (values: any) => {
+    setFieldErrors({});
     const data: CreateSingleDto = {
       ...values,
       dateOfBirth: values.dateOfBirth.toISOString(),
@@ -25,9 +66,7 @@ export default function NewSinglePage() {
         message.success('Single created successfully');
         form.resetFields();
       },
-      onError: (error) => {
-        message.error(error.message || 'Failed to create single');
-      },
+      onError: handleError
     });
   };
 
@@ -55,7 +94,12 @@ export default function NewSinglePage() {
           <Form.Item
             label="First Name"
             name="firstName"
-            rules={[{ required: true, message: 'Please input first name' }]}
+            validateStatus={fieldErrors.firstName ? 'error' : undefined}
+            help={fieldErrors.firstName}
+            rules={[
+              { required: true, message: 'Please input first name' },
+              { min: 2, message: 'First name must be at least 2 characters' }
+            ]}
           >
             <Input />
           </Form.Item>
@@ -63,7 +107,12 @@ export default function NewSinglePage() {
           <Form.Item
             label="Last Name"
             name="lastName"
-            rules={[{ required: true, message: 'Please input last name' }]}
+            validateStatus={fieldErrors.lastName ? 'error' : undefined}
+            help={fieldErrors.lastName}
+            rules={[
+              { required: true, message: 'Please input last name' },
+              { min: 2, message: 'Last name must be at least 2 characters' }
+            ]}
           >
             <Input />
           </Form.Item>
@@ -71,6 +120,8 @@ export default function NewSinglePage() {
           <Form.Item
             label="Phone Number"
             name="phoneNumber"
+            validateStatus={fieldErrors.phoneNumber ? 'error' : undefined}
+            help={fieldErrors.phoneNumber || "Enter a US phone number"}
             rules={[
               { required: true, message: 'Please input phone number' },
               { validator: (_, value) => 
@@ -79,7 +130,6 @@ export default function NewSinglePage() {
                   : Promise.reject('Please enter a valid phone number')
               }
             ]}
-            help="Enter a US phone number"
           >
             <Input 
               onChange={e => {
@@ -94,6 +144,8 @@ export default function NewSinglePage() {
           <Form.Item
             label="Email"
             name="email"
+            validateStatus={fieldErrors.email ? 'error' : undefined}
+            help={fieldErrors.email}
             rules={[{ type: 'email', message: 'Please enter a valid email' }]}
           >
             <Input />

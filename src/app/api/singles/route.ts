@@ -5,10 +5,14 @@ import { saveImage } from "@/lib/utils/image-upload";
 import { withAuth } from "@/lib/auth/withAuth";
 import { UserRole } from "@prisma/client";
 import { phoneNumberUtils } from '@/lib/utils/phone-number'
+import { Prisma } from "@prisma/client";
+import { errorFormatting } from '@/lib/utils/error-formatting'
 
 const createSingleSchema = z.object({
-  firstName: z.string().min(1),
-  lastName: z.string().min(1),
+  firstName: z.string()
+    .min(2, 'First name must be at least 2 characters'),
+  lastName: z.string()
+    .min(2, 'Last name must be at least 2 characters'),
   phoneNumber: z.string()
     .min(1, 'Phone number is required')
     .refine(phoneNumberUtils.validate, 'Invalid phone number')
@@ -26,6 +30,12 @@ const createSingleSchema = z.object({
     tags: data.tags || [],
   }
 });
+
+type ApiError = {
+  message: string;
+  code?: string;
+  details?: unknown;
+}
 
 async function POST(req: Request) {
   try {
@@ -52,10 +62,33 @@ async function POST(req: Request) {
     return NextResponse.json(single);
   } catch (error) {
     console.error('Failed to create single:', error);
-    return NextResponse.json(
-      { error: 'Failed to create single' },
-      { status: 500 }
-    );
+
+    const errorResponse: ApiError = {
+      message: 'Failed to create single',
+    };
+
+    // Handle Zod validation errors
+    if (error instanceof z.ZodError) {
+      errorResponse.message = 'Validation error';
+      errorResponse.code = 'VALIDATION_ERROR';
+      errorResponse.details = error.issues;
+      return NextResponse.json(errorResponse, { status: 400 });
+    }
+
+    // Handle Prisma unique constraint violations
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === 'P2002') {
+        const fields = error.meta?.target as string[] || ['field'];
+        errorResponse.message = errorFormatting.formatUniqueConstraintMessage(fields);
+        errorResponse.code = 'UNIQUE_CONSTRAINT_VIOLATION';
+        errorResponse.details = { fields };
+        return NextResponse.json(errorResponse, { status: 409 });
+      }
+    }
+
+    // Handle other errors
+    errorResponse.code = 'INTERNAL_SERVER_ERROR';
+    return NextResponse.json(errorResponse, { status: 500 });
   }
 }
 
@@ -77,10 +110,10 @@ async function GET(req: Request) {
     return NextResponse.json(singles);
   } catch (error) {
     console.error('Failed to fetch singles:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch singles' },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      message: 'Failed to fetch singles',
+      code: 'INTERNAL_SERVER_ERROR'
+    }, { status: 500 });
   }
 }
 

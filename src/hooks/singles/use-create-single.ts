@@ -10,12 +10,15 @@ async function createSingle(data: CreateSingleDto) {
     body: JSON.stringify(data),
   });
 
+  const result = await response.json();
+
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message ?? error.error ?? 'Failed to create single');
+    throw new Error(result.message || 'Failed to create single', { 
+      cause: result 
+    });
   }
 
-  return response.json();
+  return result;
 }
 
 export function useCreateSingle() {
