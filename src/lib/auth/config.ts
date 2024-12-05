@@ -2,20 +2,18 @@ import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/lib/db/prisma";
-import { devUsers } from "./dev-auth";
+import { devUsers, isDevLoginEnabled } from "./dev-auth";
 import { AuthUser } from "./types";
-
-const isDev = process.env.NODE_ENV === "development";
 
 export const authOptions: NextAuthOptions = {
   providers: [
-    ...(!isDev ? [
+    ...(!isDevLoginEnabled ? [
       GoogleProvider({
         clientId: process.env.GOOGLE_CLIENT_ID!,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       }),
     ] : []),
-    ...(isDev ? [
+    ...(isDevLoginEnabled ? [
       CredentialsProvider({
         id: "dev-login",
         name: "Development Login",
