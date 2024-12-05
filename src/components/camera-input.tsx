@@ -42,7 +42,7 @@ export function CameraInput({ onChange }: CameraInputProps) {
       }
     } catch (err) {
       console.error('Error accessing camera:', err);
-      message.error('Failed to access camera. Please ensure camera permissions are granted.');
+      //message.error('Failed to access camera. Please ensure camera permissions are granted.');
     }
   };
 
