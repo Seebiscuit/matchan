@@ -4,9 +4,10 @@ import { signIn } from "next-auth/react";
 import { Button, Card, Typography, Space } from "antd";
 import { GoogleOutlined, UserOutlined } from "@ant-design/icons";
 import { devUsers } from "@/lib/auth/dev-auth";
+import { isDevLoginEnabled } from "@/lib/auth/dev-auth";
 
 export default function SignIn() {
-  const isDev = process.env.NODE_ENV === "development";
+  const showDevLogin = isDevLoginEnabled();
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -21,7 +22,7 @@ export default function SignIn() {
         </div>
         
         <Space direction="vertical" style={{ width: '100%' }}>
-          {!isDev && (
+          {!showDevLogin && (
             <Button
               icon={<GoogleOutlined />}
               block
@@ -32,7 +33,7 @@ export default function SignIn() {
             </Button>
           )}
 
-          {isDev && devUsers.map(user => (
+          {showDevLogin && devUsers.map(user => (
             <Button
               key={user.id}
               icon={<UserOutlined />}

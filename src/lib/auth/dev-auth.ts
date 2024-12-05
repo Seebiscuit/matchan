@@ -22,4 +22,8 @@ export const devUsers: AuthUser[] = [
     role: "USER",
     isApproved: false,
   },
-]; 
+];
+
+export function isDevLoginEnabled() {
+  return process.env.NEXT_PUBLIC_ENABLE_DEV_LOGIN === 'true' || process.env.NODE_ENV === 'development';
+} 
