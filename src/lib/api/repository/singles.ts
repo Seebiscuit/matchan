@@ -1,17 +1,18 @@
 import { prisma } from "@/lib/db/prisma";
-import { Prisma } from "@prisma/client";
+import { Prisma, Gender } from "@prisma/client";
 import { deleteImage } from "@/lib/utils/image-upload";
 
-export type CreateSingleInput = {
+export interface CreateSingleInput {
   firstName: string;
   lastName: string;
   email?: string;
   phoneNumber: string;
-  gender: 'MALE' | 'FEMALE';
+  gender: Gender;
   dateOfBirth: Date;
   imageId?: string;
-  tags?: string[];
-};
+  imagePath?: string;
+  tags: string[];
+}
 
 export type UpdateSingleInput = Partial<CreateSingleInput>;
 
@@ -118,6 +119,17 @@ export const singlesRepository = {
       orderBy: {
         createdAt: 'desc',
       },
+    });
+  },
+
+  async findByImageId(imageId: string) {
+    return prisma.single.findFirst({
+      where: { imageId },
+      select: {
+        id: true,
+        imageId: true,
+        imagePath: true,
+      }
     });
   },
 }; 

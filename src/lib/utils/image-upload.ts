@@ -1,41 +1,34 @@
-import fs from 'fs';
-import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import { storage } from '@/lib/storage/blob-storage';
 
-const SINGLES_IMAGES_DIR = path.join(process.cwd(), 'assets', 'singles-images');
-
-// Ensure singles images directory exists
-if (!fs.existsSync(SINGLES_IMAGES_DIR)) {
-  fs.mkdirSync(SINGLES_IMAGES_DIR, { recursive: true });
-}
-
-export async function saveImage(base64Image: string): Promise<string> {
-  // Extract the base64 data
+export async function saveImage(base64Image: string): Promise<{ imageId: string, imagePath: string }> {
   const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '');
   const buffer = Buffer.from(base64Data, 'base64');
   
-  // Generate unique ID for the image
   const imageId = uuidv4();
-  const filepath = path.join(SINGLES_IMAGES_DIR, `${imageId}.jpg`);
-  
-  // Save the file
-  await fs.promises.writeFile(filepath, buffer);
-  
-  // Return just the image ID
-  return imageId;
+  const filename = `singles-images/${imageId}.jpg`;
+
+  const result = await storage.uploadFile(buffer, {
+    filename,
+    contentType: 'image/jpeg',
+  });
+
+  return {
+    imageId,
+    imagePath: result.pathname,
+  };
 }
 
-export async function deleteImage(imageId: string | null) {
-  if (!imageId) return;
+export async function deleteImage(imagePath: string | null) {
+  if (!imagePath) return;
   
   try {
-    const filepath = path.join(SINGLES_IMAGES_DIR, `${imageId}.jpg`);
-    await fs.promises.unlink(filepath);
+    await storage.deleteFile(imagePath);
   } catch (error) {
     console.error('Failed to delete image:', error);
   }
 }
 
-export function getImagePath(imageId: string): string {
-  return path.join(SINGLES_IMAGES_DIR, `${imageId}.jpg`);
+export function getImageUrl(imagePath: string): string {
+  return storage.getFileUrl(imagePath);
 } 

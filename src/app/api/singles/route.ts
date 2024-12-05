@@ -22,8 +22,11 @@ async function POST(req: Request) {
     
     // Save image if provided
     let imageId: string | undefined;
+    let imagePath: string | undefined;
     if (data.image) {
-      imageId = await saveImage(data.image);
+      const imageResult = await saveImage(data.image);
+      imageId = imageResult.imageId;
+      imagePath = imageResult.imagePath;
     }
 
     const single = await singlesRepository.create({
@@ -34,6 +37,7 @@ async function POST(req: Request) {
       dateOfBirth: new Date(data.dateOfBirth),
       email: data.email,
       imageId,
+      imagePath,
       tags: data.tags,
     });
 

@@ -28,6 +28,7 @@ model Single {
   gender      Gender
   dateOfBirth DateTime
   imageId     String?
+  imagePath   String?  @map("image_path")
   tags        Tag[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
