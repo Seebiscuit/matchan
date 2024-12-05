@@ -29,10 +29,10 @@
     "start": "next start",
     "start:fresh": "next build && next start",
     "lint": "next lint",
-    "prisma:generate": "dotenv -e .env.local -- prisma generate",
-    "prisma:push": "dotenv -e .env.local -- prisma db push",
-    "prisma:studio": "dotenv -e .env.local -- prisma studio",
-    "prisma:reset": "dotenv -e .env.local -- prisma migrate reset",
+    "prisma:generate": "dotenv -e .env.development.local -- prisma generate",
+    "prisma:push": "dotenv -e .env.development.local -- prisma db push",
+    "prisma:studio": "dotenv -e .env.development.local -- prisma studio",
+    "prisma:reset": "dotenv -e .env.development.local -- prisma migrate reset",
     "db:setup": "npm run prisma:generate && npm run prisma:push",
     "postinstall": "prisma generate"
   }

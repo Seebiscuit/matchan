@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from 'next-auth'
 import { singlesRepository } from "@/lib/api/repository/singles";
 import { z } from "zod";
 import { saveImage } from "@/lib/utils/image-upload";
 import { withAuth } from "@/lib/auth/withAuth";
 import { UserRole } from "@prisma/client";
-import { phoneNumberUtils } from '@/lib/utils/phone-number'
 import { Prisma } from "@prisma/client";
 import { errorFormatting } from '@/lib/utils/error-formatting'
 import { createSingleSchema } from '@/lib/validation/singles';
@@ -19,15 +19,18 @@ async function POST(req: Request) {
   try {
     const body = await req.json();
     const data = createSingleSchema.parse(body);
-    
+
     // Save image if provided
     let imageId: string | undefined;
-    let imagePath: string | undefined;
+    let imageUrl: string | undefined;
     if (data.image) {
       const imageResult = await saveImage(data.image);
       imageId = imageResult.imageId;
-      imagePath = imageResult.imagePath;
+      imageUrl = imageResult.imageUrl;
     }
+
+    const session = await getServerSession();
+    const userId = session?.user.id;
 
     const single = await singlesRepository.create({
       firstName: data.firstName,
@@ -37,9 +40,9 @@ async function POST(req: Request) {
       dateOfBirth: new Date(data.dateOfBirth),
       email: data.email,
       imageId,
-      imagePath,
+      imageUrl,
       tags: data.tags,
-    });
+    }, userId);
 
     return NextResponse.json(single);
   } catch (error) {

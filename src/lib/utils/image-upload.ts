@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { storage } from '@/lib/storage/blob-storage';
 
-export async function saveImage(base64Image: string): Promise<{ imageId: string, imagePath: string }> {
+export async function saveImage(base64Image: string): Promise<{ imageId: string, imageUrl: string }> {
   const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '');
   const buffer = Buffer.from(base64Data, 'base64');
   
@@ -15,20 +15,16 @@ export async function saveImage(base64Image: string): Promise<{ imageId: string,
 
   return {
     imageId,
-    imagePath: result.pathname,
+    imageUrl: result.url,
   };
 }
 
-export async function deleteImage(imagePath: string | null) {
-  if (!imagePath) return;
+export async function deleteImage(imageUrl: string | null) {
+  if (!imageUrl) return;
   
   try {
-    await storage.deleteFile(imagePath);
+    await storage.deleteFile(imageUrl);
   } catch (error) {
     console.error('Failed to delete image:', error);
   }
 }
-
-export function getImageUrl(imagePath: string): string {
-  return storage.getFileUrl(imagePath);
-} 

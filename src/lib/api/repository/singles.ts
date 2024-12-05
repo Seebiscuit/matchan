@@ -2,7 +2,7 @@ import { prisma } from "@/lib/db/prisma";
 import { Prisma, Gender } from "@prisma/client";
 import { deleteImage } from "@/lib/utils/image-upload";
 
-export interface CreateSingleInput {
+export interface SingleInput {
   firstName: string;
   lastName: string;
   email?: string;
@@ -10,19 +10,22 @@ export interface CreateSingleInput {
   gender: Gender;
   dateOfBirth: Date;
   imageId?: string;
-  imagePath?: string;
-  tags: string[];
+  imageUrl?: string;
+  tags?: string[];
 }
 
-export type UpdateSingleInput = Partial<CreateSingleInput>;
+export type CreateSingleInput = SingleInput
+export type UpdateSingleInput = Partial<SingleInput>
 
 export const singlesRepository = {
-  create: async (data: CreateSingleInput) => {
-    const { tags: tagNames, ...singleData } = data;
+  create: async (input: CreateSingleInput, userId: string) => {
+    const { tags: tagNames, ...singleData } = input;
     
     return prisma.single.create({
       data: {
         ...singleData,
+        createdBy: { connect: { id: userId } },
+        updatedBy: { connect: { id: userId } },
         tags: tagNames?.length ? {
           connectOrCreate: tagNames.map(name => ({
             where: { name },
@@ -32,17 +35,20 @@ export const singlesRepository = {
       },
       include: {
         tags: true,
+        createdBy: { select: { name: true, email: true } },
+        updatedBy: { select: { name: true, email: true } },
       },
     });
   },
 
-  update: async (id: string, data: UpdateSingleInput) => {
-    const { tags: tagNames, ...singleData } = data;
+  update: async (id: string, input: UpdateSingleInput, userId: string) => {
+    const { tags: tagNames, ...singleData } = input;
     
     return prisma.single.update({
       where: { id },
       data: {
         ...singleData,
+        updatedById: userId,
         tags: tagNames?.length ? {
           set: [],
           connectOrCreate: tagNames.map(name => ({
@@ -53,6 +59,8 @@ export const singlesRepository = {
       },
       include: {
         tags: true,
+        createdBy: { select: { name: true, email: true } },
+        updatedBy: { select: { name: true, email: true } },
       },
     });
   },
@@ -128,7 +136,7 @@ export const singlesRepository = {
       select: {
         id: true,
         imageId: true,
-        imagePath: true,
+        imageUrl: true,
       }
     });
   },

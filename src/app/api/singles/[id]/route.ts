@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from 'next-auth'
 import { singlesRepository } from "@/lib/api/repository/singles";
 import { withAuth } from "@/lib/auth/withAuth";
 import { UserRole } from "@prisma/client";
@@ -47,11 +48,13 @@ async function PATCH(
   try {
     const body = await req.json();
     const data = updateSingleSchema.parse(body);
+    const session = await getServerSession();
+    const userId = session?.user.id;
     
     const single = await singlesRepository.update(params.id, {
       ...data,
       dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : undefined,
-    });
+    }, userId);
 
     return NextResponse.json(single);
   } catch (error) {

@@ -3,7 +3,6 @@ import { put, del } from '@vercel/blob';
 export interface StorageService {
   uploadFile: (buffer: Buffer, options: UploadOptions) => Promise<StorageResult>;
   deleteFile: (path: string) => Promise<void>;
-  getFileUrl: (path: string) => string;
 }
 
 export interface StorageResult {
@@ -31,10 +30,6 @@ export class BlobStorageService implements StorageService {
 
   async deleteFile(path: string): Promise<void> {
     await del(path);
-  }
-
-  getFileUrl(path: string): string {
-    return `${process.env.NEXT_PUBLIC_BLOB_BASE_URL}/${path}`;
   }
 }
 

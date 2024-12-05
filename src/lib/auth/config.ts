@@ -1,7 +1,6 @@
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { prisma } from "@/lib/db/prisma";
 import { devUsers, isDevLoginEnabled } from "./dev-auth";
 import { AuthUser } from "./types";
 

@@ -17,6 +17,8 @@ model User {
   isApproved    Boolean   @default(false)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+  createdSingles  Single[]  @relation("CreatedSingles")
+  updatedSingles  Single[]  @relation("UpdatedSingles")
 }
 
 model Single {
@@ -28,8 +30,12 @@ model Single {
   gender      Gender
   dateOfBirth DateTime
   imageId     String?
-  imagePath   String?  @map("image_path")
+  imageUrl    String?
   tags        Tag[]
+  createdBy   User      @relation("CreatedSingles", fields: [createdById], references: [id])
+  createdById String
+  updatedBy   User      @relation("UpdatedSingles", fields: [updatedById], references: [id])
+  updatedById String
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 }
