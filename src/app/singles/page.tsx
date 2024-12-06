@@ -30,6 +30,7 @@ export default function SinglesPage() {
       title: 'Photo',
       key: 'photo',
       width: 80,
+      responsive: ['md'],
       render: (_, record) => {
         if (!record.imageId) return null;
         return (
@@ -44,23 +45,27 @@ export default function SinglesPage() {
     {
       title: 'Name',
       key: 'name',
+      fixed: 'left',
       render: (_, record) => `${record.firstName} ${record.lastName}`,
       sorter: (a, b) => a.firstName.localeCompare(b.firstName),
     },
     {
       title: 'Phone',
       key: 'phoneNumber',
+      responsive: ['sm'],
       render: (_, record) => phoneNumberUtils.format(record.phoneNumber),
     },
     {
       title: 'Email',
       dataIndex: 'email',
       key: 'email',
+      responsive: ['lg'],
     },
     {
       title: 'Gender',
       dataIndex: 'gender',
       key: 'gender',
+      responsive: ['md'],
       filters: [
         { text: 'Male', value: 'MALE' },
         { text: 'Female', value: 'FEMALE' },
@@ -70,6 +75,7 @@ export default function SinglesPage() {
     {
       title: 'Age',
       key: 'age',
+      responsive: ['sm'],
       render: (_, record) => {
         const age = dayjs().diff(dayjs(record.dateOfBirth), 'year');
         return age;
@@ -80,6 +86,7 @@ export default function SinglesPage() {
     {
       title: 'Tags',
       key: 'tags',
+      responsive: ['lg'],
       render: (_, record) => (
         <Space size={[0, 8]} wrap>
           {record.tags.map((tag) => (
@@ -91,6 +98,7 @@ export default function SinglesPage() {
     {
       title: 'Created At',
       key: 'createdAt',
+      responsive: ['xl'],
       render: (_, record) => dayjs(record.createdAt).format('YYYY-MM-DD HH:mm'),
       sorter: (a, b) => 
         dayjs(a.createdAt).unix() - dayjs(b.createdAt).unix(),
@@ -98,7 +106,8 @@ export default function SinglesPage() {
     {
       title: 'Actions',
       key: 'actions',
-      width: 100,
+      fixed: 'right',
+      width: 70,
       render: (_, record) => (
         <Popconfirm
           title="Delete Single"
@@ -120,13 +129,14 @@ export default function SinglesPage() {
   ];
 
   return (
-    <div className="p-6">
+    <div style={{ padding: '24px' }}>
       <h1 className="text-2xl font-bold mb-6">Singles Management</h1>
       <Table
         columns={columns}
         dataSource={singles}
         loading={isLoading}
         rowKey="id"
+        scroll={{ x: 800 }}
         pagination={{
           defaultPageSize: 10,
           showSizeChanger: true,

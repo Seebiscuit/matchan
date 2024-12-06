@@ -1,11 +1,8 @@
 import { Inter } from 'next/font/google';
-import { ConfigProvider } from 'antd';
 import StyledComponentsRegistry from '@/lib/antd-registry';
 import AuthProvider from '@/providers/auth-provider';
 import QueryProvider from '@/providers/query-provider';
-
-// Import Ant Design styles
-import 'antd/dist/reset.css';
+import AntdLayout from '@/components/AntdLayout';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -21,13 +18,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={inter.className} style={{ margin: 0, padding: 0 }}>
         <StyledComponentsRegistry>
           <AuthProvider>
             <QueryProvider>
-              <ConfigProvider>
+              <AntdLayout>
                 {children}
-              </ConfigProvider>
+              </AntdLayout>
             </QueryProvider>
           </AuthProvider>
         </StyledComponentsRegistry>
