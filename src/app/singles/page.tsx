@@ -10,7 +10,7 @@ import { phoneNumberUtils } from '@/lib/utils/phone-number';
 import SingleDetails from '@/components/singles/SingleDetails';
 
 export default function SinglesPage() {
-  const { data: singles, isLoading } = useSingles();
+  const { data: singles, isLoading, refetch } = useSingles();
   const deleteMutation = useDeleteSingle();
   const [selectedSingle, setSelectedSingle] = useState<SingleWithTags | null>(null);
 
@@ -25,6 +25,10 @@ export default function SinglesPage() {
 
   const getimageId = (imageId: string) => {
     return `/api/assets/singles/${imageId}`;
+  };
+
+  const handleDrawerClose = () => {
+    setSelectedSingle(null);
   };
 
   const columns: ColumnsType<SingleWithTags> = [
@@ -159,10 +163,22 @@ export default function SinglesPage() {
         title="Single Details"
         placement="right"
         width={640}
-        onClose={() => setSelectedSingle(null)}
+        onClose={handleDrawerClose}
         open={!!selectedSingle}
+        afterOpenChange={(open) => {
+          if (open) {
+            refetch();
+          }
+        }}
       >
-        {selectedSingle && <SingleDetails single={selectedSingle} />}
+        {selectedSingle && (
+          <SingleDetails 
+            single={selectedSingle} 
+            onUpdate={() => {
+              refetch();
+            }}
+          />
+        )}
       </Drawer>
     </div>
   );

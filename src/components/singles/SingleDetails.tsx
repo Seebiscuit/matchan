@@ -6,14 +6,18 @@ import { EditOutlined, SaveOutlined, CloseOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { phoneNumberUtils } from '@/lib/utils/phone-number';
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface SingleDetailsProps {
   single: SingleWithTags;
+  onUpdate?: () => void;
 }
 
-export default function SingleDetails({ single }: SingleDetailsProps) {
+export default function SingleDetails({ single, onUpdate }: SingleDetailsProps) {
   const [isEditingTags, setIsEditingTags] = useState(false);
   const [selectedTags, setSelectedTags] = useState(single.tags.map(t => t.name));
+  const [isSaving, setIsSaving] = useState(false);
+  const queryClient = useQueryClient();
 
   const getimageId = (imageId: string) => {
     return `/api/assets/singles/${imageId}`;
@@ -21,6 +25,7 @@ export default function SingleDetails({ single }: SingleDetailsProps) {
 
   const handleSaveTags = async () => {
     try {
+      setIsSaving(true);
       const response = await fetch(`/api/singles/${single.id}/tags`, {
         method: 'PUT',
         headers: {
@@ -30,13 +35,19 @@ export default function SingleDetails({ single }: SingleDetailsProps) {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update tags');
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to update tags');
       }
 
+      await queryClient.invalidateQueries({ queryKey: ['singles'] });
+      onUpdate?.();
       message.success('Tags updated successfully');
       setIsEditingTags(false);
     } catch (error) {
-      message.error('Failed to update tags');
+      message.error(error instanceof Error ? error.message : 'Failed to update tags');
+      setSelectedTags(single.tags.map(t => t.name)); // Reset to original tags on error
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -51,12 +62,14 @@ export default function SingleDetails({ single }: SingleDetailsProps) {
             value={selectedTags}
             onChange={setSelectedTags}
             tokenSeparators={[',']}
+            disabled={isSaving}
           />
           <Space>
             <Button 
               type="primary" 
               icon={<SaveOutlined />} 
               onClick={handleSaveTags}
+              loading={isSaving}
             >
               Save
             </Button>
@@ -66,6 +79,7 @@ export default function SingleDetails({ single }: SingleDetailsProps) {
                 setSelectedTags(single.tags.map(t => t.name));
                 setIsEditingTags(false);
               }}
+              disabled={isSaving}
             >
               Cancel
             </Button>
