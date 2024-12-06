@@ -17,7 +17,7 @@ export default function SignIn() {
             Singles Registry
           </Typography.Title>
           <Typography.Text>
-            Sign in to access the singles registry
+            Sign in to access Matchan
           </Typography.Text>
         </div>
         
