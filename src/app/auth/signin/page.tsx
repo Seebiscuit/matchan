@@ -14,10 +14,10 @@ export default function SignIn() {
       <Card className="w-96">
         <div className="text-center mb-8">
           <Typography.Title level={2}>
-            Singles Registry
+            Registry
           </Typography.Title>
           <Typography.Text>
-            Sign in to access Matchan
+            Sign in to access the Registry
           </Typography.Text>
         </div>
         
@@ -44,7 +44,7 @@ export default function SignIn() {
                 callbackUrl: "/"
               })}
             >
-              Login as {user.name} ({user.role})
+              Login as {user.name}
             </Button>
           ))}
         </Space>

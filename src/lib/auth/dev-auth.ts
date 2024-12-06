@@ -4,8 +4,36 @@ export const devUsers: AuthUser[] = [
   {
     id: "admin-dev",
     email: "admin@dev.local",
-    name: "Admin User",
+    name: "Sima",
     role: "ADMIN",
+    isApproved: true,
+  },
+  {
+    id: "atara",
+    email: "atara@gmail.com",
+    name: "Atara",
+    role: "USER",
+    isApproved: true,
+  },
+  {
+    id: "miri",
+    email: "miri@gmail.com",
+    name: "Miri",
+    role: "USER",
+    isApproved: true,
+  },
+  {
+    id: "gary",
+    email: "gary@gmail.com",
+    name: "Gary",
+    role: "ADMIN",
+    isApproved: true,
+  },
+  {
+    id: "alysa",
+    email: "alysa@gmail.com",
+    name: "Alysa",
+    role: "USER",
     isApproved: true,
   },
   {
@@ -14,13 +42,6 @@ export const devUsers: AuthUser[] = [
     name: "Regular User",
     role: "USER",
     isApproved: true,
-  },
-  {
-    id: "pending-dev",
-    email: "pending@dev.local",
-    name: "Pending User",
-    role: "USER",
-    isApproved: false,
   },
 ];
 

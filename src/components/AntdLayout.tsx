@@ -120,7 +120,7 @@ export default function AntdLayout({
           <Row justify="space-between" align="middle" style={{ height: '100%' }}>
             <Col>
               <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>
-                <h1 style={{ margin: 0, fontSize: '18px' }}>Matchan</h1>
+                <h1 style={{ margin: 0, fontSize: '18px' }}>Registry</h1>
               </Link>
             </Col>
             <Col>

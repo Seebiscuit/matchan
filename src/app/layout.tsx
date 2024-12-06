@@ -7,7 +7,7 @@ import AntdLayout from '@/components/AntdLayout';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
-  title: 'Matchan',
+  title: 'Registry',
   description: 'Registry application for singles',
 };
 
