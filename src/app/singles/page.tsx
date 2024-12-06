@@ -1,16 +1,17 @@
 'use client';
 
-import { Table, Avatar, Tag, Space, Button, Popconfirm, message } from 'antd';
+import { Table, Avatar, Tag, Space, Button, Popconfirm, message, Drawer, Descriptions } from 'antd';
 import { DeleteOutlined } from '@ant-design/icons';
 import { ColumnsType } from 'antd/es/table';
 import { useSingles, SingleWithTags, useDeleteSingle } from '@/hooks/singles/use-singles';
 import dayjs from 'dayjs';
-import React from 'react';
+import React, { useState } from 'react';
 import { phoneNumberUtils } from '@/lib/utils/phone-number';
 
 export default function SinglesPage() {
   const { data: singles, isLoading } = useSingles();
   const deleteMutation = useDeleteSingle();
+  const [selectedSingle, setSelectedSingle] = useState<SingleWithTags | null>(null);
 
   const handleDelete = async (id: string) => {
     try {
@@ -137,12 +138,61 @@ export default function SinglesPage() {
         loading={isLoading}
         rowKey="id"
         scroll={{ x: 800 }}
+        onRow={(record) => ({
+          onClick: () => setSelectedSingle(record),
+          style: { cursor: 'pointer' }
+        })}
         pagination={{
           defaultPageSize: 10,
           showSizeChanger: true,
           showTotal: (total) => `Total ${total} singles`,
         }}
       />
+      <Drawer
+        title="Single Details"
+        placement="right"
+        width={640}
+        onClose={() => setSelectedSingle(null)}
+        open={!!selectedSingle}
+      >
+        {selectedSingle && (
+          <div>
+            <div style={{ marginBottom: 24, textAlign: 'center' }}>
+              {selectedSingle.imageId && (
+                <Avatar
+                  src={getimageId(selectedSingle.imageId)}
+                  size={200}
+                  shape="square"
+                  style={{ marginBottom: 16 }}
+                />
+              )}
+            </div>
+            <Descriptions layout="vertical" column={2} bordered>
+              <Descriptions.Item label="First Name">{selectedSingle.firstName}</Descriptions.Item>
+              <Descriptions.Item label="Last Name">{selectedSingle.lastName}</Descriptions.Item>
+              <Descriptions.Item label="Phone">{phoneNumberUtils.format(selectedSingle.phoneNumber)}</Descriptions.Item>
+              <Descriptions.Item label="Email">{selectedSingle.email}</Descriptions.Item>
+              <Descriptions.Item label="Gender">{selectedSingle.gender}</Descriptions.Item>
+              <Descriptions.Item label="Age">
+                {dayjs().diff(dayjs(selectedSingle.dateOfBirth), 'year')}
+              </Descriptions.Item>
+              <Descriptions.Item label="Date of Birth">
+                {dayjs(selectedSingle.dateOfBirth).format('YYYY-MM-DD')}
+              </Descriptions.Item>
+              <Descriptions.Item label="Created At">
+                {dayjs(selectedSingle.createdAt).format('YYYY-MM-DD HH:mm')}
+              </Descriptions.Item>
+              <Descriptions.Item label="Tags" span={2}>
+                <Space size={[0, 8]} wrap>
+                  {selectedSingle.tags.map((tag) => (
+                    <Tag key={tag.id}>{tag.name}</Tag>
+                  ))}
+                </Space>
+              </Descriptions.Item>
+            </Descriptions>
+          </div>
+        )}
+      </Drawer>
     </div>
   );
 } 
