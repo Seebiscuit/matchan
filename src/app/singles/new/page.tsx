@@ -84,14 +84,14 @@ export default function NewSinglePage() {
           onFinish={onFinish}
           autoComplete="off"
         >
-        <Form.Item
-          label="Photo"
-          name="image"
-          help="Take a photo using your device's camera"
-        >
-          <CameraInput onChange={handleImageCapture} />
-        </Form.Item>
-        
+          <Form.Item
+            label="Photo"
+            name="image"
+            help="Take a photo using your device's camera"
+          >
+            <CameraInput onChange={handleImageCapture} />
+          </Form.Item>
+          
           <Form.Item
             label="First Name"
             name="firstName"
@@ -163,18 +163,6 @@ export default function NewSinglePage() {
               disabledDate={date => date?.isAfter(maxDate)}
               defaultPickerValue={dayjs().subtract(25, 'year')}
               format="DD/MM/YYYY"
-            />
-          </Form.Item>
-
-          <Form.Item
-            label="Tags"
-            name="tags"
-            help="Enter comma-separated tags"
-          >
-            <Select
-              mode="tags"
-              tokenSeparators={[',']}
-              style={{ width: '100%' }}
             />
           </Form.Item>
 
