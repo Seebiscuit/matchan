@@ -18,14 +18,14 @@ export type CreateSingleInput = SingleInput
 export type UpdateSingleInput = Partial<SingleInput>
 
 export const singlesRepository = {
-  create: async (input: CreateSingleInput, userId: string) => {
+  create: async (input: CreateSingleInput, userEmail: string) => {
     const { tags: tagNames, ...singleData } = input;
     
     return prisma.single.create({
       data: {
         ...singleData,
-        createdBy: { connect: { id: userId } },
-        updatedBy: { connect: { id: userId } },
+        createdBy: { connect: { email: userEmail } },
+        updatedBy: { connect: { email: userEmail } },
         tags: tagNames?.length ? {
           connectOrCreate: tagNames.map(name => ({
             where: { name },
@@ -35,20 +35,20 @@ export const singlesRepository = {
       },
       include: {
         tags: true,
-        createdBy: { select: { name: true, email: true } },
-        updatedBy: { select: { name: true, email: true } },
+        createdBy: true,
+        updatedBy: true,
       },
     });
   },
 
-  update: async (id: string, input: UpdateSingleInput, userId: string) => {
+  update: async (id: string, input: UpdateSingleInput, userEmail: string) => {
     const { tags: tagNames, ...singleData } = input;
     
     return prisma.single.update({
       where: { id },
       data: {
         ...singleData,
-        updatedById: userId,
+        updatedBy: { connect: { email: userEmail } },
         tags: tagNames?.length ? {
           set: [],
           connectOrCreate: tagNames.map(name => ({
@@ -59,8 +59,8 @@ export const singlesRepository = {
       },
       include: {
         tags: true,
-        createdBy: { select: { name: true, email: true } },
-        updatedBy: { select: { name: true, email: true } },
+        createdBy: true,
+        updatedBy: true,
       },
     });
   },

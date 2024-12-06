@@ -19,6 +19,7 @@ async function POST(req: Request) {
   try {
     const body = await req.json();
     const data = createSingleSchema.parse(body);
+    const session = await getServerSession();
 
     // Save image if provided
     let imageId: string | undefined;
@@ -28,9 +29,6 @@ async function POST(req: Request) {
       imageId = imageResult.imageId;
       imageUrl = imageResult.imageUrl;
     }
-
-    const session = await getServerSession();
-    const userId = session?.user.id;
 
     const single = await singlesRepository.create({
       firstName: data.firstName,
@@ -42,7 +40,7 @@ async function POST(req: Request) {
       imageId,
       imageUrl,
       tags: data.tags,
-    }, userId);
+    }, session.user.email!);
 
     return NextResponse.json(single);
   } catch (error) {
