@@ -1,7 +1,7 @@
 'use client';
 
-import { ConfigProvider, Layout, Row, Col, theme, Menu, Button } from 'antd';
-import { PlusOutlined, UserOutlined, LoginOutlined, LogoutOutlined } from '@ant-design/icons';
+import { ConfigProvider, Layout, Row, Col, theme, Button, Dropdown, Space } from 'antd';
+import { PlusOutlined, UserOutlined, LoginOutlined, LogoutOutlined, MenuOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signIn, signOut } from 'next-auth/react';
@@ -17,6 +17,88 @@ export default function AntdLayout({
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const isAdmin = session?.user?.role === 'ADMIN';
+  const isSignInPage = pathname === '/auth/signin';
+
+  const getMenuItems = () => {
+    if (status === 'authenticated') {
+      return [
+        {
+          key: 'add',
+          label: <Link href="/singles/new">Add Single</Link>,
+          icon: <PlusOutlined />,
+        },
+        ...(isAdmin ? [{
+          key: 'view',
+          label: <Link href="/singles">View Singles</Link>,
+          icon: <UserOutlined />,
+        }] : []),
+        {
+          key: 'logout',
+          label: 'Logout',
+          icon: <LogoutOutlined />,
+          onClick: () => signOut(),
+        },
+      ];
+    }
+    return !isSignInPage ? [{
+      key: 'login',
+      label: 'Login',
+      icon: <LoginOutlined />,
+      onClick: () => signIn(),
+    }] : [];
+  };
+
+  const renderDesktopButtons = () => (
+    <>
+      {status === 'authenticated' ? (
+        <>
+          <Col>
+            <Link href="/singles/new">
+              <Button type="primary" icon={<PlusOutlined />}>
+                Add Single
+              </Button>
+            </Link>
+          </Col>
+          {isAdmin && (
+            <Col>
+              <Link href="/singles">
+                <Button 
+                  icon={<UserOutlined />}
+                  type={pathname === '/singles' ? 'primary' : 'default'}
+                >
+                  View Singles
+                </Button>
+              </Link>
+            </Col>
+          )}
+          <Col>
+            <Button 
+              icon={<LogoutOutlined />}
+              onClick={() => signOut()}
+            >
+              Logout
+            </Button>
+          </Col>
+        </>
+      ) : !isSignInPage && (
+        <Col>
+          <Button 
+            type="primary"
+            icon={<LoginOutlined />}
+            onClick={() => signIn()}
+          >
+            Login
+          </Button>
+        </Col>
+      )}
+    </>
+  );
+
+  const renderMobileMenu = () => (
+    <Dropdown menu={{ items: getMenuItems() }} placement="bottomRight">
+      <Button icon={<MenuOutlined />} />
+    </Dropdown>
+  );
 
   return (
     <ConfigProvider
@@ -43,47 +125,14 @@ export default function AntdLayout({
             </Col>
             <Col>
               <Row gutter={16} align="middle">
-                {status === 'authenticated' ? (
-                  <>
-                    <Col>
-                      <Link href="/singles/new">
-                        <Button type="primary" icon={<PlusOutlined />}>
-                          Add Single
-                        </Button>
-                      </Link>
-                    </Col>
-                    {isAdmin && (
-                      <Col>
-                        <Link href="/singles">
-                          <Button 
-                            icon={<UserOutlined />}
-                            type={pathname === '/singles' ? 'primary' : 'default'}
-                          >
-                            View Singles
-                          </Button>
-                        </Link>
-                      </Col>
-                    )}
-                    <Col>
-                      <Button 
-                        icon={<LogoutOutlined />}
-                        onClick={() => signOut()}
-                      >
-                        Logout
-                      </Button>
-                    </Col>
-                  </>
-                ) : (
-                  <Col>
-                    <Button 
-                      type="primary"
-                      icon={<LoginOutlined />}
-                      onClick={() => signIn()}
-                    >
-                      Login
-                    </Button>
-                  </Col>
-                )}
+                <Col xs={0} sm={0} md={24}>
+                  <Row gutter={16} align="middle">
+                    {renderDesktopButtons()}
+                  </Row>
+                </Col>
+                <Col xs={24} sm={24} md={0}>
+                  {renderMobileMenu()}
+                </Col>
               </Row>
             </Col>
           </Row>
