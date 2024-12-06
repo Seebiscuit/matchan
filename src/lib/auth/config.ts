@@ -3,6 +3,7 @@ import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { devUsers, isDevLoginEnabled } from "./dev-auth";
 import { AuthUser } from "./types";
+import { usersRepository } from "@/lib/api/repository/users";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -21,17 +22,8 @@ export const authOptions: NextAuthOptions = {
         },
         async authorize(credentials) {
           const email = credentials?.email;
-          const devUser = devUsers.find(u => u.email === email);
-          if (devUser) {
-            return {
-              id: devUser.id,
-              email: devUser.email,
-              name: devUser.name,
-              role: devUser.role,
-              isApproved: devUser.isApproved,
-            };
-          }
-          return null;
+          if (!email) return null;
+          return usersRepository.findOrCreateFromEmail(email);
         },
       }),
     ] : []),
