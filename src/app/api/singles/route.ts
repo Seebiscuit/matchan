@@ -81,6 +81,10 @@ async function GET(req: Request) {
   const tags = searchParams.get('tags')?.split(',') || undefined;
   const take = Number(searchParams.get('take')) || undefined;
   const skip = Number(searchParams.get('skip')) || undefined;
+  const createdAfter = searchParams.get('createdAfter') || undefined;
+  const createdBefore = searchParams.get('createdBefore') || undefined;
+  const minAge = searchParams.get('minAge') ? Number(searchParams.get('minAge')) : undefined;
+  const maxAge = searchParams.get('maxAge') ? Number(searchParams.get('maxAge')) : undefined;
 
   try {
     const singles = await singlesRepository.findMany({
@@ -88,6 +92,10 @@ async function GET(req: Request) {
       tags,
       take,
       skip,
+      createdAfter,
+      createdBefore,
+      minAge,
+      maxAge,
     });
 
     return NextResponse.json(singles);

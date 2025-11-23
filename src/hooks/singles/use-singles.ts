@@ -5,8 +5,31 @@ export type SingleWithTags = Single & {
   tags: Tag[];
 };
 
-async function fetchSingles() {
-  const response = await fetch('/api/singles');
+export interface SinglesFilters {
+  createdAfter?: string;
+  createdBefore?: string;
+  minAge?: number;
+  maxAge?: number;
+}
+
+async function fetchSingles(filters?: SinglesFilters) {
+  const params = new URLSearchParams();
+  
+  if (filters?.createdAfter) {
+    params.append('createdAfter', filters.createdAfter);
+  }
+  if (filters?.createdBefore) {
+    params.append('createdBefore', filters.createdBefore);
+  }
+  if (filters?.minAge !== undefined) {
+    params.append('minAge', filters.minAge.toString());
+  }
+  if (filters?.maxAge !== undefined) {
+    params.append('maxAge', filters.maxAge.toString());
+  }
+
+  const url = `/api/singles${params.toString() ? `?${params.toString()}` : ''}`;
+  const response = await fetch(url);
   if (!response.ok) {
     throw new Error('Failed to fetch singles');
   }
@@ -22,10 +45,10 @@ async function deleteSingle(id: string) {
   }
 }
 
-export function useSingles() {
+export function useSingles(filters?: SinglesFilters) {
   return useQuery({
-    queryKey: ['singles'],
-    queryFn: fetchSingles,
+    queryKey: ['singles', filters],
+    queryFn: () => fetchSingles(filters),
   });
 }
 

@@ -1,16 +1,19 @@
 'use client';
 
-import { Table, Avatar, Tag, Space, Button, Popconfirm, message, Drawer } from 'antd';
+import { Table, Avatar, Tag, Space, Button, Popconfirm, message, Drawer, DatePicker, InputNumber, Card, Row, Col } from 'antd';
 import { DeleteOutlined } from '@ant-design/icons';
 import { ColumnsType } from 'antd/es/table';
-import { useSingles, SingleWithTags, useDeleteSingle } from '@/hooks/singles/use-singles';
+import { useSingles, SingleWithTags, useDeleteSingle, SinglesFilters } from '@/hooks/singles/use-singles';
 import dayjs from 'dayjs';
 import React, { useState } from 'react';
 import { phoneNumberUtils } from '@/lib/utils/phone-number';
+
+const { RangePicker } = DatePicker;
 import SingleDetails from '@/components/singles/SingleDetails';
 
 export default function SinglesPage() {
-  const { data: singles, isLoading, refetch } = useSingles();
+  const [filters, setFilters] = useState<SinglesFilters>({});
+  const { data: singles, isLoading, refetch } = useSingles(filters);
   const deleteMutation = useDeleteSingle();
   const [selectedSingle, setSelectedSingle] = useState<SingleWithTags | null>(null);
 
@@ -29,6 +32,35 @@ export default function SinglesPage() {
 
   const handleDrawerClose = () => {
     setSelectedSingle(null);
+  };
+
+  const handleDateRangeChange = (dates: any) => {
+    if (dates && dates.length === 2) {
+      setFilters(prev => ({
+        ...prev,
+        createdAfter: dates[0].startOf('day').toISOString(),
+        createdBefore: dates[1].endOf('day').toISOString(),
+      }));
+    } else {
+      setFilters(prev => {
+        const { createdAfter, createdBefore, ...rest } = prev;
+        return rest;
+      });
+    }
+  };
+
+  const handleMinAgeChange = (value: number | null) => {
+    setFilters(prev => ({
+      ...prev,
+      minAge: value || undefined,
+    }));
+  };
+
+  const handleMaxAgeChange = (value: number | null) => {
+    setFilters(prev => ({
+      ...prev,
+      maxAge: value || undefined,
+    }));
   };
 
   const columns: ColumnsType<SingleWithTags> = [
@@ -108,7 +140,7 @@ export default function SinglesPage() {
       render: (_, record) => record.createdById || 'System',
     },
     {
-      title: 'Created At',
+      title: 'Registered On',
       key: 'createdAt',
       responsive: ['xl'],
       render: (_, record) => dayjs(record.createdAt).format('YYYY-MM-DD HH:mm'),
@@ -143,6 +175,58 @@ export default function SinglesPage() {
   return (
     <div style={{ padding: '24px' }}>
       <h1 className="text-2xl font-bold mb-6">Singles Management</h1>
+      
+      <Card title="Filters" style={{ marginBottom: '16px' }}>
+        <Row gutter={[16, 16]}>
+          <Col xs={24} sm={24} md={12} lg={10} xl={8}>
+            <div>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>
+                Registration Date Range
+              </label>
+              <RangePicker
+                style={{ width: '100%' }}
+                onChange={handleDateRangeChange}
+                placeholder={['Start Date', 'End Date']}
+              />
+            </div>
+          </Col>
+          <Col xs={24} sm={12} md={6} lg={7} xl={8}>
+            <Row gutter={[8, 16]}>
+              <Col xs={12} sm={24} md={12} lg={12} xl={12}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>
+                    Min Age
+                  </label>
+                  <InputNumber
+                    style={{ width: '100%' }}
+                    min={18}
+                    max={100}
+                    placeholder="Min"
+                    value={filters.minAge}
+                    onChange={handleMinAgeChange}
+                  />
+                </div>
+              </Col>
+              <Col xs={12} sm={24} md={12} lg={12} xl={12}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>
+                    Max Age
+                  </label>
+                  <InputNumber
+                    style={{ width: '100%' }}
+                    min={18}
+                    max={100}
+                    placeholder="Max"
+                    value={filters.maxAge}
+                    onChange={handleMaxAgeChange}
+                  />
+                </div>
+              </Col>
+            </Row>
+          </Col>
+        </Row>
+      </Card>
+
       <Table
         columns={columns}
         dataSource={singles}
@@ -162,7 +246,7 @@ export default function SinglesPage() {
       <Drawer
         title="Single Details"
         placement="right"
-        width={640}
+        size={640}
         onClose={handleDrawerClose}
         open={!!selectedSingle}
         afterOpenChange={(open) => {

@@ -97,6 +97,10 @@ export const singlesRepository = {
     tags?: string[];
     take?: number;
     skip?: number;
+    createdAfter?: string;
+    createdBefore?: string;
+    minAge?: number;
+    maxAge?: number;
   }) => {
     const where: Prisma.SingleWhereInput = {};
     
@@ -115,6 +119,34 @@ export const singlesRepository = {
           id: { in: params.tags },
         },
       };
+    }
+
+    // Date range filtering
+    if (params?.createdAfter || params?.createdBefore) {
+      where.createdAt = {};
+      if (params.createdAfter) {
+        where.createdAt.gte = new Date(params.createdAfter);
+      }
+      if (params.createdBefore) {
+        where.createdAt.lte = new Date(params.createdBefore);
+      }
+    }
+
+    // Age range filtering (convert age to date of birth range)
+    if (params?.minAge !== undefined || params?.maxAge !== undefined) {
+      where.dateOfBirth = {};
+      if (params.maxAge !== undefined) {
+        // Max age means oldest birth date (furthest in the past)
+        const maxAgeDate = new Date();
+        maxAgeDate.setFullYear(maxAgeDate.getFullYear() - params.maxAge - 1);
+        where.dateOfBirth.gte = maxAgeDate;
+      }
+      if (params.minAge !== undefined) {
+        // Min age means youngest birth date (most recent)
+        const minAgeDate = new Date();
+        minAgeDate.setFullYear(minAgeDate.getFullYear() - params.minAge);
+        where.dateOfBirth.lte = minAgeDate;
+      }
     }
 
     return prisma.single.findMany({
