@@ -1,11 +1,11 @@
 'use client';
 
-import { Table, Avatar, Tag, Space, Button, Popconfirm, message, Drawer, DatePicker, InputNumber, Card, Row, Col } from 'antd';
-import { DeleteOutlined } from '@ant-design/icons';
+import { Table, Avatar, Tag, Space, Button, Popconfirm, message, Drawer, DatePicker, InputNumber, Card, Row, Col, Input } from 'antd';
+import { DeleteOutlined, UserOutlined } from '@ant-design/icons';
 import { ColumnsType } from 'antd/es/table';
 import { useSingles, SingleWithTags, useDeleteSingle, SinglesFilters } from '@/hooks/singles/use-singles';
 import dayjs from 'dayjs';
-import React, { useState } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { phoneNumberUtils } from '@/lib/utils/phone-number';
 
 const { RangePicker } = DatePicker;
@@ -61,6 +61,26 @@ export default function SinglesPage() {
       ...prev,
       maxAge: value || undefined,
     }));
+  };
+
+  // Debounce timer for name search
+  const nameSearchTimer = useRef<NodeJS.Timeout>();
+
+  const handleNameSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    
+    // Clear existing timer
+    if (nameSearchTimer.current) {
+      clearTimeout(nameSearchTimer.current);
+    }
+    
+    // Set new timer
+    nameSearchTimer.current = setTimeout(() => {
+      setFilters(prev => ({
+        ...prev,
+        name: value || undefined,
+      }));
+    }, 300);
   };
 
   const columns: ColumnsType<SingleWithTags> = [
@@ -178,7 +198,20 @@ export default function SinglesPage() {
       
       <Card title="Filters" style={{ marginBottom: '16px' }}>
         <Row gutter={[16, 16]}>
-          <Col xs={24} sm={24} md={12} lg={10} xl={8}>
+          <Col xs={24} sm={12} md={8} lg={6} xl={6}>
+            <div>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>
+                Search by Name
+              </label>
+              <Input
+                placeholder="Search first or last name..."
+                prefix={<UserOutlined />}
+                onChange={handleNameSearchChange}
+                allowClear
+              />
+            </div>
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={6} xl={6}>
             <div>
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>
                 Registration Date Range
@@ -190,7 +223,7 @@ export default function SinglesPage() {
               />
             </div>
           </Col>
-          <Col xs={24} sm={12} md={6} lg={7} xl={8}>
+          <Col xs={24} sm={12} md={8} lg={6} xl={6}>
             <Row gutter={[8, 16]}>
               <Col xs={12} sm={24} md={12} lg={12} xl={12}>
                 <div>
