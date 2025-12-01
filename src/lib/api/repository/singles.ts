@@ -93,7 +93,7 @@ export const singlesRepository = {
   },
 
   findMany: async (params?: {
-    search?: string;
+    name?: string;
     tags?: string[];
     take?: number;
     skip?: number;
@@ -104,12 +104,11 @@ export const singlesRepository = {
   }) => {
     const where: Prisma.SingleWhereInput = {};
     
-    if (params?.search) {
+    // Name search (firstName and lastName only)
+    if (params?.name) {
       where.OR = [
-        { firstName: { contains: params.search, mode: 'insensitive' } },
-        { lastName: { contains: params.search, mode: 'insensitive' } },
-        { email: { contains: params.search, mode: 'insensitive' } },
-        { phoneNumber: { contains: params.search } },
+        { firstName: { contains: params.name, mode: 'insensitive' as const } },
+        { lastName: { contains: params.name, mode: 'insensitive' as const } },
       ];
     }
 

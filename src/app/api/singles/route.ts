@@ -77,7 +77,7 @@ async function POST(req: Request) {
 
 async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const search = searchParams.get('search') || undefined;
+  const name = searchParams.get('name') || undefined;
   const tags = searchParams.get('tags')?.split(',') || undefined;
   const take = Number(searchParams.get('take')) || undefined;
   const skip = Number(searchParams.get('skip')) || undefined;
@@ -88,7 +88,7 @@ async function GET(req: Request) {
 
   try {
     const singles = await singlesRepository.findMany({
-      search,
+      name,
       tags,
       take,
       skip,
