@@ -163,7 +163,7 @@ export const singlesRepository = {
   },
 
   async findByImageId(imageId: string) {
-    return prisma.single.findFirst({
+    return prisma.single.findUnique({
       where: { imageId },
       select: {
         id: true,
