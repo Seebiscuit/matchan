@@ -6,6 +6,7 @@ export type SingleWithTags = Single & {
 };
 
 export interface SinglesFilters {
+  name?: string;
   createdAfter?: string;
   createdBefore?: string;
   minAge?: number;
@@ -15,6 +16,9 @@ export interface SinglesFilters {
 async function fetchSingles(filters?: SinglesFilters) {
   const params = new URLSearchParams();
   
+  if (filters?.name) {
+    params.append('name', filters.name);
+  }
   if (filters?.createdAfter) {
     params.append('createdAfter', filters.createdAfter);
   }
